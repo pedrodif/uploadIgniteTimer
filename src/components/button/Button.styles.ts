@@ -1,16 +1,16 @@
-import styled, { css } from 'styled-components';
+import styled, { css } from 'styled-components'
 
-export type ButtonColorVariant = 'primary' | 'secondary' | 'danger' | 'success';
+export type ButtonColorVariant = 'primary' | 'secondary' | 'danger' | 'success'
 
 interface IButtonConateinerProps {
-  variant: ButtonColorVariant;
+  variant: ButtonColorVariant
 }
 
 const buttonVariants = {
   primary: 'purple',
   secondary: 'orange',
   danger: 'red',
-  success: 'green'
+  success: 'green',
 }
 
 export const ButtonContainer = styled.button<IButtonConateinerProps>`
@@ -19,16 +19,16 @@ export const ButtonContainer = styled.button<IButtonConateinerProps>`
   border: 0;
   border-radius: 8px;
   margin: 8px;
-  color: ${props => props.theme.white};
+  color: ${(props) => props.theme.white};
   cursor: pointer;
 
   // Forma de acessar as props e pegar o valor que está contido na propriedade passada ao componente
-  /* ${props => {
+  /* ${(props) => {
     return css`
-      background-color: ${buttonVariants[props.variant]}
+      background-color: ${buttonVariants[props.variant]};
     `
   }} */
 
   // Forma de acessar os valores que estão contidos no arquivo default.ts
-  background-color: ${props => props.theme['green-500']}
+  background-color: ${(props) => props.theme['green-500']};
 `

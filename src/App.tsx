@@ -1,12 +1,12 @@
 // Packages
-import { ThemeProvider } from "styled-components";
+import { ThemeProvider } from 'styled-components'
 
 // Components
-import { Button } from "./components/button/Button";
+import { Button } from './components/button/Button'
 
 // Styles
-import { GlobalStyle } from "./styles/global";
-import { defaultTheme } from "./styles/themes/default";
+import { GlobalStyle } from './styles/global'
+import { defaultTheme } from './styles/themes/default'
 
 export function App() {
   return (
@@ -17,11 +17,8 @@ export function App() {
       <Button color="success" />
       <Button />
 
-
       {/* Aplicando o componente de estilo global */}
       <GlobalStyle />
     </ThemeProvider>
   )
 }
-
-
