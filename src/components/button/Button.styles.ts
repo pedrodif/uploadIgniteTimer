@@ -30,5 +30,5 @@ export const ButtonContainer = styled.button<IButtonConateinerProps>`
   }} */
 
   // Forma de acessar os valores que estão contidos no arquivo default.ts
-  background-color: ${props => props.theme.primary}
+  background-color: ${props => props.theme['green-500']}
 `
