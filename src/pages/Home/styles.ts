@@ -35,9 +35,15 @@ const BaseInput = styled.input`
   font-weight: bold;
   font-size: 1.125rem;
   padding: 0 0.5rem;
+  color: ${(props) => props.theme['gray-100']};
 `
-export const TaskInput = styled(BaseInput)``
-export const MinutesAmountInput = styled(BaseInput)``
+export const TaskInput = styled(BaseInput)`
+  flex: 1;
+`
+
+export const MinutesAmountInput = styled(BaseInput)`
+  width: 4rem;
+`
 
 export const CountDownContainer = styled.div`
   font-family: 'Roboto Mono', monospace;
