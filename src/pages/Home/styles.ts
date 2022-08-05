@@ -27,6 +27,18 @@ export const FormContainer = styled.div`
   flex-wrap: wrap;
 `
 
+const BaseInput = styled.input`
+  background: transparent;
+  height: 2.5rem;
+  border: 0;
+  border-bottom: 2px solid ${(props) => props.theme['gray-500']};
+  font-weight: bold;
+  font-size: 1.125rem;
+  padding: 0 0.5rem;
+`
+export const TaskInput = styled(BaseInput)``
+export const MinutesAmountInput = styled(BaseInput)``
+
 export const CountDownContainer = styled.div`
   font-family: 'Roboto Mono', monospace;
   font-size: 10rem;
