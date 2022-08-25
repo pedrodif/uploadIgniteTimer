@@ -1,4 +1,5 @@
 // Packages
+import { useState } from 'react'
 import { Play } from 'phosphor-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -32,10 +33,15 @@ const newCycleFormValidationSchema = zod.object({
 // Criando uma tipagem a partir do validation schema, que seria equivalente ao uso da interface comentada acima:
 type INewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
 
-interface ICycle {}
+interface ICycle {
+  id: string
+  task: string
+  minutesAmount: number
+}
 
 export function Home() {
-  const [first, setfirst] = useState()
+  const [cycles, setCycles] = useState<ICycle[]>([])
+  const [activeCycleId, setActiveCycleId] = useState<string | null>(null)
 
   const { register, handleSubmit, watch, formState, reset } =
     useForm<INewCycleFormData>({
@@ -47,11 +53,20 @@ export function Home() {
     })
 
   function handleCreateNewCycle(data: INewCycleFormData) {
-    console.log(data)
+    const newCycle: ICycle = {
+      id: String(new Date().getTime()),
+      task: data.task,
+      minutesAmount: data.minutesAmount,
+    }
+    setCycles((oldState) => [...oldState, newCycle])
+    setActiveCycleId(newCycle.id)
     reset()
   }
 
-  console.log(formState.errors)
+  // Maneira de verificar os erros no console a partir de uma função interna do react-hook-form, que foi resgatada (devolvida) através da desestruturação -> console.log(formState.errors)
+
+  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
+  console.log(activeCycle)
 
   const task = watch('task')
   const isSubmitDisabled = !task
