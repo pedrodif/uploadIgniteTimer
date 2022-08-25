@@ -5,6 +5,7 @@ export const HistoryContainer = styled.main`
   flex-direction: column;
   flex: 1;
   padding: 3.5rem;
+  /* height: 100%; */
 
   h1 {
     font-size: 1.5rem;
