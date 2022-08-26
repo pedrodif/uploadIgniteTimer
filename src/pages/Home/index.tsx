@@ -14,6 +14,7 @@ import {
   MinutesAmountInput,
   Separator,
   StartCountdownButton,
+  StopCountdownButton,
   TaskInput,
 } from './styles'
 
@@ -39,12 +40,23 @@ interface ICycle {
   task: string
   minutesAmount: number
   startDate: Date
+  interruptedDate?: Date
+  finishedDate?: Date
 }
 
 export function Home() {
   const [cycles, setCycles] = useState<ICycle[]>([])
   const [activeCycleId, setActiveCycleId] = useState<string | null>(null)
   const [amountSecondsPassed, setAmountSecondsPassed] = useState<number>(0)
+
+  // Configurando o timer
+  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
+  const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
+  const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
+  const minutesAmount = Math.floor(currentSeconds / 60)
+  const secondsAmount = currentSeconds % 60
+  const minutes = String(minutesAmount).padStart(2, '0')
+  const seconds = String(secondsAmount).padStart(2, '0')
 
   const { register, handleSubmit, watch, formState, reset } =
     useForm<INewCycleFormData>({
@@ -55,23 +67,35 @@ export function Home() {
       },
     })
 
-  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
-
   useEffect(() => {
     let interval: number
 
     if (activeCycle) {
       interval = setInterval(() => {
-        setAmountSecondsPassed(
-          differenceInSeconds(new Date(), activeCycle.startDate),
+        const secondsDifference = differenceInSeconds(
+          new Date(),
+          activeCycle.startDate,
         )
+        if (secondsDifference >= totalSeconds) {
+          setCycles(
+            cycles.map((cycle) => {
+              if (cycle.id === activeCycleId) {
+                return { ...cycle, finishedDate: new Date() }
+              } else {
+                return cycle
+              }
+            }),
+          )
+        } else {
+          setAmountSecondsPassed(secondsDifference)
+        }
       }, 1000)
     }
 
     return () => {
       clearInterval(interval)
     }
-  }, [activeCycle])
+  }, [activeCycle, totalSeconds])
 
   function handleCreateNewCycle(data: INewCycleFormData) {
     const newCycle: ICycle = {
@@ -86,15 +110,20 @@ export function Home() {
     reset()
   }
 
-  // Maneira de verificar os erros no console a partir de uma função interna do react-hook-form, que foi resgatada (devolvida) através da desestruturação -> console.log(formState.errors)
+  function handleInterruptCycle() {
+    setCycles(
+      cycles.map((cycle) => {
+        if (cycle.id === activeCycleId) {
+          return { ...cycle, interruptedDate: new Date() }
+        } else {
+          return cycle
+        }
+      }),
+    )
+    setActiveCycleId(null)
+  }
 
-  // Configurando o timer
-  const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
-  const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
-  const minutesAmount = Math.floor(currentSeconds / 60)
-  const secondsAmount = currentSeconds % 60
-  const minutes = String(minutesAmount).padStart(2, '0')
-  const seconds = String(secondsAmount).padStart(2, '0')
+  // Maneira de verificar os erros no console a partir de uma função interna do react-hook-form, que foi resgatada (devolvida) através da desestruturação -> console.log(formState.errors)
 
   useEffect(() => {
     if (activeCycle) {
@@ -114,6 +143,7 @@ export function Home() {
             id="task"
             list="task-suggestions"
             placeholder="Dê um nome para o seu projeto"
+            disabled={!!activeCycle}
             {...register('task')}
           />
 
@@ -133,6 +163,7 @@ export function Home() {
             step={5}
             min={5}
             max={60}
+            disabled={!!activeCycle}
             {...register('minutesAmount', { valueAsNumber: true })}
           />
 
@@ -148,7 +179,7 @@ export function Home() {
         </CountDownContainer>
 
         {activeCycle ? (
-          <StopCountdownButton disabled={isSubmitDisabled} type="submit">
+          <StopCountdownButton onClick={handleInterruptCycle} type="button">
             <HandPalm size={24} />
             Interromper
           </StopCountdownButton>
