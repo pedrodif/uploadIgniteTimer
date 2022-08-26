@@ -1,7 +1,8 @@
 // Packages
-import { useState } from 'react'
-import { Play } from 'phosphor-react'
+import { useEffect, useState } from 'react'
+import { HandPalm, Play } from 'phosphor-react'
 import { useForm } from 'react-hook-form'
+import { differenceInSeconds } from 'date-fns'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as zod from 'zod'
 
@@ -37,6 +38,7 @@ interface ICycle {
   id: string
   task: string
   minutesAmount: number
+  startDate: Date
 }
 
 export function Home() {
@@ -53,21 +55,38 @@ export function Home() {
       },
     })
 
+  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
+
+  useEffect(() => {
+    let interval: number
+
+    if (activeCycle) {
+      interval = setInterval(() => {
+        setAmountSecondsPassed(
+          differenceInSeconds(new Date(), activeCycle.startDate),
+        )
+      }, 1000)
+    }
+
+    return () => {
+      clearInterval(interval)
+    }
+  }, [activeCycle])
+
   function handleCreateNewCycle(data: INewCycleFormData) {
     const newCycle: ICycle = {
       id: String(new Date().getTime()),
       task: data.task,
       minutesAmount: data.minutesAmount,
+      startDate: new Date(),
     }
     setCycles((oldState) => [...oldState, newCycle])
     setActiveCycleId(newCycle.id)
+    setAmountSecondsPassed(0)
     reset()
   }
 
   // Maneira de verificar os erros no console a partir de uma função interna do react-hook-form, que foi resgatada (devolvida) através da desestruturação -> console.log(formState.errors)
-
-  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
-  console.log(activeCycle)
 
   // Configurando o timer
   const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
@@ -76,6 +95,12 @@ export function Home() {
   const secondsAmount = currentSeconds % 60
   const minutes = String(minutesAmount).padStart(2, '0')
   const seconds = String(secondsAmount).padStart(2, '0')
+
+  useEffect(() => {
+    if (activeCycle) {
+      document.title = `${minutes}:${seconds}`
+    }
+  }, [activeCycle, minutes, seconds])
 
   const task = watch('task')
   const isSubmitDisabled = !task
@@ -122,10 +147,17 @@ export function Home() {
           <span>{seconds[1]}</span>
         </CountDownContainer>
 
-        <StartCountdownButton disabled={isSubmitDisabled} type="submit">
-          <Play size={24} />
-          Começar
-        </StartCountdownButton>
+        {activeCycle ? (
+          <StopCountdownButton disabled={isSubmitDisabled} type="submit">
+            <HandPalm size={24} />
+            Interromper
+          </StopCountdownButton>
+        ) : (
+          <StartCountdownButton disabled={isSubmitDisabled} type="submit">
+            <Play size={24} />
+            Começar
+          </StartCountdownButton>
+        )}
       </form>
     </HomeContainer>
   )
