@@ -5,12 +5,20 @@ import { differenceInSeconds } from 'date-fns'
 // Styles
 import { CountDownContainer, Separator } from './styles'
 
+// Types
+import { ICycle } from '../..'
+
 interface ICountdownProps {
   activeCycle: any
-  setCycles
+  setCycles: any
+  activeCycleId: any
 }
 
-export function CountDown({ activeCycle }: ICountdownProps) {
+export function CountDown({
+  activeCycle,
+  setCycles,
+  activeCycleId,
+}: ICountdownProps) {
   const [amountSecondsPassed, setAmountSecondsPassed] = useState<number>(0)
 
   const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0

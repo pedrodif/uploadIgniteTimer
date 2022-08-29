@@ -21,7 +21,7 @@ import {
 //   minutesAmount: number
 // }
 
-interface ICycle {
+export interface ICycle {
   id: string
   task: string
   minutesAmount: number
@@ -83,7 +83,11 @@ export function Home() {
     <HomeContainer>
       <form onSubmit={handleSubmit(handleCreateNewCycle)} action="">
         <NewCycleForm />
-        <CountDown activeCycle={activeCycle} setCycles={setCycles} />
+        <CountDown
+          activeCycle={activeCycle}
+          setCycles={setCycles}
+          activeCycleId={activeCycleId}
+        />
 
         {activeCycle ? (
           <StopCountdownButton onClick={handleInterruptCycle} type="button">
