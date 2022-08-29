@@ -1,6 +1,31 @@
+// Packages
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as zod from 'zod'
+
+// Styles
 import { FormContainer, MinutesAmountInput } from './styles'
 
+const newCycleFormValidationSchema = zod.object({
+  task: zod.string().min(1, 'Informe a Tarefa'),
+  minutesAmount: zod
+    .number()
+    .min(1, 'O ciclo precisa ser de no mínimo 5 minutos')
+    .max(60, 'O ciclo precisa ser de no máximo 60 minutos'),
+})
+
+// Criando uma tipagem a partir do validation schema, que seria equivalente ao uso da interface comentada acima:
+type INewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
+
 export function NewCycleForm() {
+  const { register, handleSubmit, watch, formState, reset } =
+    useForm<INewCycleFormData>({
+      resolver: zodResolver(newCycleFormValidationSchema),
+      defaultValues: {
+        task: '',
+        minutesAmount: 0,
+      },
+    })
   return (
     <FormContainer>
       <label htmlFor="task">Vou tabralhar em</label>
