@@ -1,28 +1,26 @@
 // Packages
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { differenceInSeconds } from 'date-fns'
+
+// Context
+import { CyclesContext } from '../..'
 
 // Styles
 import { CountDownContainer, Separator } from './styles'
 
-// Types
-import { ICycle } from '../..'
-
-interface ICountdownProps {
-  activeCycle: any
-  setCycles: any
-  activeCycleId: any
-}
-
-export function CountDown({
-  activeCycle,
-  setCycles,
-  activeCycleId,
-}: ICountdownProps) {
+export function Countdown() {
+  const { activeCycle, activeCycleId, markCurrentCycleAsFinished } =
+    useContext(CyclesContext)
   const [amountSecondsPassed, setAmountSecondsPassed] = useState<number>(0)
 
   const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
+  const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
+  const minutesAmount = Math.floor(currentSeconds / 60)
+  const secondsAmount = currentSeconds % 60
+  const minutes = String(minutesAmount).padStart(2, '0')
+  const seconds = String(secondsAmount).padStart(2, '0')
 
+  // Effects
   useEffect(() => {
     let interval: number
 
@@ -33,15 +31,7 @@ export function CountDown({
           activeCycle.startDate,
         )
         if (secondsDifference >= totalSeconds) {
-          setCycles((state) =>
-            state.map((cycle) => {
-              if (cycle.id === activeCycleId) {
-                return { ...cycle, finishedDate: new Date() }
-              } else {
-                return cycle
-              }
-            }),
-          )
+          markCurrentCycleAsFinished()
           setAmountSecondsPassed(totalSeconds)
           clearInterval(interval)
         } else {
@@ -53,7 +43,13 @@ export function CountDown({
     return () => {
       clearInterval(interval)
     }
-  }, [activeCycle, activeCycleId, totalSeconds])
+  }, [activeCycle, activeCycleId, markCurrentCycleAsFinished, totalSeconds])
+
+  useEffect(() => {
+    if (activeCycle) {
+      document.title = `${minutes}:${seconds}`
+    }
+  }, [activeCycle, minutes, seconds])
 
   return (
     <CountDownContainer>

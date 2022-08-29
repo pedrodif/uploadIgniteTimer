@@ -1,12 +1,12 @@
 // Packages
-import { useEffect, useState } from 'react'
+import { createContext, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { differenceInSeconds } from 'date-fns'
 
 // Componentso
 import { HandPalm, Play } from 'phosphor-react'
 import { NewCycleForm } from './components/NewCycleForm'
-import { CountDown } from './components/Countdown'
+import { Countdown } from './components/Countdown'
 
 // Styles
 import {
@@ -30,30 +30,45 @@ export interface ICycle {
   finishedDate?: Date
 }
 
+interface ICyclesContextType {
+  activeCycle: ICycle | undefined
+  activeCycleId: string | null
+  markCurrentCycleAsFinished: () => void
+}
+
+export const CyclesContext = createContext({} as ICyclesContextType)
+
 export function Home() {
   const [cycles, setCycles] = useState<ICycle[]>([])
   const [activeCycleId, setActiveCycleId] = useState<string | null>(null)
 
   // Configurando o timer
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
-  const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
-  const minutesAmount = Math.floor(currentSeconds / 60)
-  const secondsAmount = currentSeconds % 60
-  const minutes = String(minutesAmount).padStart(2, '0')
-  const seconds = String(secondsAmount).padStart(2, '0')
 
-  function handleCreateNewCycle(data: INewCycleFormData) {
-    const newCycle: ICycle = {
-      id: String(new Date().getTime()),
-      task: data.task,
-      minutesAmount: data.minutesAmount,
-      startDate: new Date(),
-    }
-    setCycles((oldState) => [...oldState, newCycle])
-    setActiveCycleId(newCycle.id)
-    setAmountSecondsPassed(0)
-    reset()
+  function markCurrentCycleAsFinished() {
+    setCycles((state) =>
+      state.map((cycle) => {
+        if (cycle.id === activeCycleId) {
+          return { ...cycle, finishedDate: new Date() }
+        } else {
+          return cycle
+        }
+      }),
+    )
   }
+
+  // function handleCreateNewCycle(data: INewCycleFormData) {
+  //   const newCycle: ICycle = {
+  //     id: String(new Date().getTime()),
+  //     task: data.task,
+  //     minutesAmount: data.minutesAmount,
+  //     startDate: new Date(),
+  //   }
+  //   setCycles((oldState) => [...oldState, newCycle])
+  //   setActiveCycleId(newCycle.id)
+  //   setAmountSecondsPassed(0)
+  //   reset()
+  // }
 
   function handleInterruptCycle() {
     setCycles((state) =>
@@ -70,24 +85,18 @@ export function Home() {
 
   // Maneira de verificar os erros no console a partir de uma função interna do react-hook-form, que foi resgatada (devolvida) através da desestruturação -> console.log(formState.errors)
 
-  useEffect(() => {
-    if (activeCycle) {
-      document.title = `${minutes}:${seconds}`
-    }
-  }, [activeCycle, minutes, seconds])
-
-  const task = watch('task')
-  const isSubmitDisabled = !task
+  // const task = watch('task')
+  // const isSubmitDisabled = !task
 
   return (
     <HomeContainer>
-      <form onSubmit={handleSubmit(handleCreateNewCycle)} action="">
-        <NewCycleForm />
-        <CountDown
-          activeCycle={activeCycle}
-          setCycles={setCycles}
-          activeCycleId={activeCycleId}
-        />
+      <form /* onSubmit={handleSubmit(handleCreateNewCycle)} */ action="">
+        <CyclesContext.Provider
+          value={{ activeCycle, activeCycleId, markCurrentCycleAsFinished }}
+        >
+          {/* <NewCycleForm /> */}
+          <Countdown />
+        </CyclesContext.Provider>
 
         {activeCycle ? (
           <StopCountdownButton onClick={handleInterruptCycle} type="button">
@@ -95,7 +104,7 @@ export function Home() {
             Interromper
           </StopCountdownButton>
         ) : (
-          <StartCountdownButton disabled={isSubmitDisabled} type="submit">
+          <StartCountdownButton /* disabled={isSubmitDisabled} */ type="submit">
             <Play size={24} />
             Começar
           </StartCountdownButton>
