@@ -1,7 +1,8 @@
 // Packages
-import { createContext, useEffect, useState } from 'react'
+import { createContext, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
-import { differenceInSeconds } from 'date-fns'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as zod from 'zod'
 
 // Componentso
 import { HandPalm, Play } from 'phosphor-react'
@@ -37,6 +38,14 @@ interface ICyclesContextType {
 }
 
 export const CyclesContext = createContext({} as ICyclesContextType)
+
+const newCycleFormValidationSchema = zod.object({
+  task: zod.string().min(1, 'Informe a Tarefa'),
+  minutesAmount: zod
+    .number()
+    .min(1, 'O ciclo precisa ser de no mínimo 5 minutos')
+    .max(60, 'O ciclo precisa ser de no máximo 60 minutos'),
+})
 
 // Criando uma tipagem a partir do validation schema, que seria equivalente ao uso da interface comentada acima:
 type INewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
