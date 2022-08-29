@@ -1,6 +1,6 @@
 // Packages
 import { createContext, useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { FormProvider, useForm } from 'react-hook-form'
 import { differenceInSeconds } from 'date-fns'
 
 // Componentso
@@ -38,9 +38,22 @@ interface ICyclesContextType {
 
 export const CyclesContext = createContext({} as ICyclesContextType)
 
+// Criando uma tipagem a partir do validation schema, que seria equivalente ao uso da interface comentada acima:
+type INewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
+
 export function Home() {
   const [cycles, setCycles] = useState<ICycle[]>([])
   const [activeCycleId, setActiveCycleId] = useState<string | null>(null)
+
+  const newCycleForm = useForm<INewCycleFormData>({
+    resolver: zodResolver(newCycleFormValidationSchema),
+    defaultValues: {
+      task: '',
+      minutesAmount: 0,
+    },
+  })
+
+  const { register, handleSubmit, watch, formState, reset } = newCycleForm
 
   // Configurando o timer
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
@@ -57,18 +70,18 @@ export function Home() {
     )
   }
 
-  // function handleCreateNewCycle(data: INewCycleFormData) {
-  //   const newCycle: ICycle = {
-  //     id: String(new Date().getTime()),
-  //     task: data.task,
-  //     minutesAmount: data.minutesAmount,
-  //     startDate: new Date(),
-  //   }
-  //   setCycles((oldState) => [...oldState, newCycle])
-  //   setActiveCycleId(newCycle.id)
-  //   setAmountSecondsPassed(0)
-  //   reset()
-  // }
+  function handleCreateNewCycle(data: INewCycleFormData) {
+    const newCycle: ICycle = {
+      id: String(new Date().getTime()),
+      task: data.task,
+      minutesAmount: data.minutesAmount,
+      startDate: new Date(),
+    }
+    setCycles((oldState) => [...oldState, newCycle])
+    setActiveCycleId(newCycle.id)
+    setAmountSecondsPassed(0)
+    reset()
+  }
 
   function handleInterruptCycle() {
     setCycles((state) =>
@@ -85,16 +98,18 @@ export function Home() {
 
   // Maneira de verificar os erros no console a partir de uma função interna do react-hook-form, que foi resgatada (devolvida) através da desestruturação -> console.log(formState.errors)
 
-  // const task = watch('task')
-  // const isSubmitDisabled = !task
+  const task = watch('task')
+  const isSubmitDisabled = !task
 
   return (
     <HomeContainer>
-      <form /* onSubmit={handleSubmit(handleCreateNewCycle)} */ action="">
+      <form onSubmit={handleSubmit(handleCreateNewCycle)} action="">
         <CyclesContext.Provider
           value={{ activeCycle, activeCycleId, markCurrentCycleAsFinished }}
         >
-          {/* <NewCycleForm /> */}
+          <FormProvider {...newCycleForm}>
+            <NewCycleForm />
+          </FormProvider>
           <Countdown />
         </CyclesContext.Provider>
 
@@ -104,7 +119,7 @@ export function Home() {
             Interromper
           </StopCountdownButton>
         ) : (
-          <StartCountdownButton /* disabled={isSubmitDisabled} */ type="submit">
+          <StartCountdownButton disabled={isSubmitDisabled} type="submit">
             <Play size={24} />
             Começar
           </StartCountdownButton>
