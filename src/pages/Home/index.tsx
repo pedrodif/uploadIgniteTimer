@@ -1,4 +1,5 @@
 // Packages
+import { useContext } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as zod from 'zod'
@@ -15,6 +16,9 @@ import {
   StopCountdownButton,
 } from './styles'
 
+// Context
+import { CyclesContext } from '../../contexts/CyclesContext'
+
 const newCycleFormValidationSchema = zod.object({
   task: zod.string().min(1, 'Informe a Tarefa'),
   minutesAmount: zod
@@ -27,6 +31,9 @@ const newCycleFormValidationSchema = zod.object({
 type INewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
 
 export function Home() {
+  const { createNewCycle, interruptCurrentCycle, activeCycle } =
+    useContext(CyclesContext)
+
   const newCycleForm = useForm<INewCycleFormData>({
     resolver: zodResolver(newCycleFormValidationSchema),
     defaultValues: {
@@ -35,11 +42,12 @@ export function Home() {
     },
   })
 
-  const { register, handleSubmit, watch, formState, reset } = newCycleForm
+  const { handleSubmit, watch, reset } = newCycleForm
 
-  // Configurando o timer
-
-  // Maneira de verificar os erros no console a partir de uma função interna do react-hook-form, que foi resgatada (devolvida) através da desestruturação -> console.log(formState.errors)
+  function handleCreateNewCycle(data: INewCycleFormData) {
+    createNewCycle(data)
+    reset()
+  }
 
   const task = watch('task')
   const isSubmitDisabled = !task
@@ -53,7 +61,7 @@ export function Home() {
         <Countdown />
 
         {activeCycle ? (
-          <StopCountdownButton onClick={handleInterruptCycle} type="button">
+          <StopCountdownButton onClick={interruptCurrentCycle} type="button">
             <HandPalm size={24} />
             Interromper
           </StopCountdownButton>
@@ -67,3 +75,5 @@ export function Home() {
     </HomeContainer>
   )
 }
+
+// Maneira de verificar os erros no console a partir de uma função interna do react-hook-form, que foi resgatada (devolvida) através da desestruturação -> console.log(formState.errors)
