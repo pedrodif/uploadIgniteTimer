@@ -2,7 +2,8 @@
 import { createContext, ReactNode, useReducer, useState } from 'react'
 
 // Types, Reducers, Enum
-import { ActionTypes, cyclesReducer, ICycle } from '../reducers/cycles'
+import { cyclesReducer, ICycle } from '../reducers/cycles/reducer'
+import { ActionTypes } from '../reducers/cycles/actions'
 
 interface ICreateCycleData {
   task: string
