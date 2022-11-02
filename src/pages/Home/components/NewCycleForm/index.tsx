@@ -17,7 +17,7 @@ export function NewCycleForm() {
       <label htmlFor="task">Vou tabralhar em</label>
       <TaskInput
         id="task"
-        list="task-suggestions"
+        list="task-suggestion"
         placeholder="Dê um nome para o seu projeto"
         disabled={!!activeCycle}
         {...register('task')}
